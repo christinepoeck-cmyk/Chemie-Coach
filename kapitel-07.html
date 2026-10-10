@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warum leitet Salzwasser den Strom? – Interaktives Teilchenmodell · MioAni</title>
+<style>
+:root{
+  --bg:#e9eef2; --card:#ffffff; --ink:#16324f; --muted:#56687a; --line:#cfd8e0;
+  --accent:#1f5f9e; --amber:#f2a900; --amber-ink:#4a3300;
+  --cl:#2a8f3f; --na:#6c7681; --o:#d23c27; --ok:#24774a; --bad:#b42318;
+  --font:"Seravek","Gill Sans Nova","Gill Sans","Calibri","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5}
+.wrap{max-width:1260px;margin:0 auto;padding:18px 16px 36px}
+header{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;justify-content:space-between}
+h1{font-size:clamp(1.55rem,3.2vw,2.3rem);line-height:1.1;margin:0;font-weight:700;letter-spacing:-.015em}
+.sub{margin:.35rem 0 0;color:var(--muted);font-size:1rem}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 14px;counter-reset:s}
+.steps button{font:inherit;font-size:.95rem;display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:7px 14px 7px 7px;border-radius:999px;cursor:pointer}
+.steps button span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--bg);font-weight:700;font-size:.9rem}
+.steps button:hover{border-color:var(--accent)}
+.steps button.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.steps button.active span{background:var(--amber);color:var(--amber-ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr);gap:14px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+.grid>*{min-width:0}
+.card{background:var(--card);border-radius:14px;border:1px solid var(--line)}
+.stagecard{padding:10px}
+.stage{position:relative;width:100%;border-radius:9px;overflow:hidden;background:#fbfdfe}
+canvas{display:block;width:100%;height:auto;aspect-ratio:900/560;cursor:pointer;touch-action:manipulation}
+.info{position:absolute;left:0;top:0;max-width:260px;background:var(--ink);color:#fff;border-radius:9px;padding:9px 12px;font-size:.88rem;line-height:1.4;pointer-events:none;box-shadow:0 6px 18px rgba(22,50,79,.25)}
+.info b{display:block;font-size:.95rem;margin-bottom:2px;color:#ffd666}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 2px 4px}
+.spacer{flex:1}
+.btn{font:inherit;font-size:.93rem;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:7px 13px;border-radius:9px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn[aria-pressed="true"]{background:#e3edf7;border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.volt{font-weight:700;padding:8px 16px;display:flex;align-items:center;gap:8px}
+.volt i{width:12px;height:12px;border-radius:50%;background:#b8c2cc;display:inline-block}
+.volt.on{background:var(--amber);border-color:#d99600;color:var(--amber-ink)}
+.volt.on i{background:#fff6cc;box-shadow:0 0 8px 2px #fff1a8}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:.88rem;border:0;background:#fff;color:var(--ink);padding:7px 10px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.active{background:var(--ink);color:#fff}
+.pairs{display:flex;align-items:center;gap:10px;font-size:.93rem}
+.pairs input{width:150px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:.86rem;color:var(--muted);padding:6px 2px 2px}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{display:inline-block;border-radius:50%}
+.status{margin-left:auto;font-weight:700;color:var(--ink)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.panel{padding:18px 20px 18px}
+.panel .where{color:var(--muted);font-size:.9rem;margin:0}
+.panel h2{margin:.1rem 0 .8rem;font-size:1.45rem;line-height:1.2}
+.task{border-left:4px solid var(--amber);background:#fff8e1;padding:10px 14px;border-radius:0 9px 9px 0;margin-bottom:12px}
+.task strong{display:block;font-size:.92rem;margin-bottom:2px}
+.task p{margin:0}
+.explain p{margin:.5rem 0}
+.explain ol{padding-left:1.4rem;margin:.5rem 0}
+.explain li{margin:.35rem 0}
+.merke{margin-top:12px;border:2px solid var(--ink);border-radius:9px;padding:9px 13px}
+.merke strong{display:block}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin-top:8px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+th{color:var(--muted);font-weight:600}
+.measure{margin-top:14px}
+.measure h3{font-size:1.05rem;margin:0 0 6px}
+.measure .row{display:flex;gap:8px;flex-wrap:wrap}
+.hint{font-size:.86rem;color:var(--muted);margin:.4rem 0 0}
+#quizCol{padding:18px 20px}
+#quizCol h2{margin:0 0 4px}
+.q{border-top:1px solid var(--line);padding:14px 0}
+.qn{font-size:.85rem;color:var(--muted)}
+.q h3{font-size:1.08rem;margin:.15rem 0 .6rem}
+.opts{display:grid;gap:7px}
+.opt{font:inherit;font-size:.96rem;text-align:left;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:9px 12px;border-radius:9px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:#e6f4ec}
+.opt.wrong{border-color:var(--bad);background:#fdecea}
+.fb{margin-top:8px;font-size:.94rem;padding:8px 12px;border-radius:9px}
+.fb.ok{background:#e6f4ec}.fb.no{background:#fdecea}
+.score{border-top:1px solid var(--line);padding-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+footer{color:var(--muted);font-size:.85rem;margin-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="fonts.css"><style id="mio-brand">
+.mio-bar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid #e3e9f3;font-family:'Lexend',system-ui,sans-serif}
+.mio-in{max-width:1180px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mio-logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:1.15rem;color:#14284b;text-decoration:none}
+.mio-logo svg{width:28px;height:28px;flex:none}
+.mio-back{font-size:.86rem;font-weight:400;color:#14284b;text-decoration:none;background:#fff;border:1px solid #e3e9f3;padding:7px 15px;border-radius:999px;white-space:nowrap}
+.mio-back:hover{border-color:#2563eb;color:#2563eb}
+.mio-foot{border-top:1px solid #e3e9f3;background:#fff;margin-top:32px;font-family:'Lexend',system-ui,sans-serif;font-size:.82rem;color:#6b7a94}
+.mio-foot .mio-in{height:auto;padding:22px 16px;flex-wrap:wrap}
+.mio-foot nav{display:flex;gap:18px}
+.mio-foot a{color:#6b7a94;text-decoration:none}
+.mio-foot a:hover{color:#2563eb}
+.mio-kicker{margin:0 0 4px;font-family:'Lexend',system-ui,sans-serif;font-size:.74rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#14284b}
+@media (max-width:480px){.mio-back{padding:6px 11px;font-size:.8rem}}
+</style></head>
+<body><div class="mio-bar"><div class="mio-in"><a class="mio-logo" href="index.html"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#2563eb"/><path d="M11.5 28V13l8.5 10 8.5-10v15" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="33" cy="9" r="4.2" fill="#f2735a"/></svg>MioAni</a><a class="mio-back" href="index.html#kapitel">← Alle Kapitel</a></div></div>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="mio-kicker">Chemie · Kapitel 7 · Salze und Ionen</p><h1>Warum leitet Salzwasser den Strom?</h1>
+      <p class="sub">Interaktives Teilchenmodell zu eurem Experiment „Leitfähigkeit von Salzlösungen“</p>
+    </div>
+  </header>
+
+  <nav class="steps" aria-label="Stationen">
+    <button data-step="1"><span>1</span>Festes Kochsalz</button>
+    <button data-step="2"><span>2</span>Destilliertes Wasser</button>
+    <button data-step="3"><span>3</span>Salz löst sich</button>
+    <button data-step="4"><span>4</span>Strom in der Lösung</button>
+    <button data-step="5"><span>?</span>Teste dich</button>
+  </nav>
+
+  <main class="grid">
+    <section id="stageCol" class="card stagecard">
+      <div id="stage" class="stage">
+        <canvas id="sim" role="img" aria-label="Teilchenmodell: Becherglas mit Elektroden, Stromkreis mit Lampe und Strommesser"></canvas>
+        <div id="info" class="info" hidden></div>
+      </div>
+      <div class="controls">
+        <button id="voltBtn" class="btn volt"><i></i><span>Spannung: AUS</span></button>
+        <button id="dropBtn" class="btn primary" data-show="3">Salz ins Wasser geben</button>
+        <div class="pairs" data-show="4">
+          <label for="pairs">Salzmenge:</label>
+          <input type="range" id="pairs" min="0" max="10" step="1" value="6">
+          <b id="pairsLbl"></b>
+        </div>
+        <button id="chargeBtn" class="btn" data-show="234" aria-pressed="false">Teilladungen δ+/δ− zeigen</button>
+        <span class="spacer"></span>
+        <div class="seg" role="group" aria-label="Tempo">
+          <button data-speed="0.4">langsam</button>
+          <button data-speed="1" class="active">normal</button>
+          <button data-speed="2.5">schnell</button>
+        </div>
+        <button id="pauseBtn" class="btn">Pause</button>
+        <button id="resetBtn" class="btn">Neu starten</button>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="width:14px;height:14px;background:radial-gradient(circle at 35% 35%,#d7dbe0,#5d6670)"></i>Na⁺ Natrium-Ion (Kation)</span>
+        <span><i class="dot" style="width:18px;height:18px;background:radial-gradient(circle at 35% 35%,#8fe39b,#22863a)"></i>Cl⁻ Chlorid-Ion (Anion)</span>
+        <span><svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true"><circle cx="9" cy="9" r="6.5" fill="#d23c27"/><circle cx="17" cy="4" r="4" fill="#eef0f2" stroke="#9aa2ab" stroke-width=".8"/><circle cx="17" cy="14" r="4" fill="#eef0f2" stroke="#9aa2ab" stroke-width=".8"/></svg>H₂O Wassermolekül (Dipol)</span>
+        <span><i class="dot" style="width:8px;height:8px;background:#2563eb"></i>Elektron im Kabel</span>
+        <span class="status" id="status"></span>
+      </div>
+    </section>
+
+    <section id="quizCol" class="card" hidden>
+      <h2>Teste dich</h2>
+      <p class="hint" style="margin-top:0">Wähle jeweils eine Antwort. Du bekommst sofort eine Rückmeldung.</p>
+      <div id="quiz"></div>
+    </section>
+
+    <aside class="card panel" id="panel"></aside>
+  </main>
+
+  <footer>Modellhafte Darstellung: Teilchengrößen, Abstände und Geschwindigkeiten sind nicht maßstabsgetreu. Tipp: Klicke im Bild auf einzelne Teilchen oder auf den Schalter.</footer>
+</div>
+
+<script>
+(() => {
+/* ---------- Grundgrößen ---------- */
+const W = 900, H = 560;
+const BOX = {x0:182, x1:718, y0:220, y1:512};
+const WATER_TOP = 198;
+const RAD = {Na:10, Cl:16};
+const SHELL_D = {Na:20, Cl:26};
+const HANG = 52.25*Math.PI/180, HD = 10;
+const LX = 148, RX = 752, WIRE_Y = 62, SPACING = 26;
+const TAU = Math.PI*2;
+
+const canvas = document.getElementById('sim');
+const ctx = canvas.getContext('2d');
+const stageEl = document.getElementById('stage');
+const infoEl = document.getElementById('info');
+const $ = s => document.querySelector(s);
+let scale = 1, dpr = 1;
+
+function resize(){
+  const w = stageEl.clientWidth;
+  if(!w) return;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  scale = w / W;
+  canvas.width = Math.round(w*dpr);
+  canvas.height = Math.round(H*scale*dpr);
+}
+if (window.ResizeObserver) new ResizeObserver(resize).observe(stageEl);
+window.addEventListener('resize', resize);
+
+/* ---------- Sprites ---------- */
+function sprite(r, c1, c2, sign){
+  const k = 3, m = r + 2, s = Math.ceil(m*2*k);
+  const c = document.createElement('canvas'); c.width = c.height = s;
+  const g = c.getContext('2d'); g.scale(k,k);
+  const gr = g.createRadialGradient(m-r*.35, m-r*.4, r*.12, m, m, r);
+  gr.addColorStop(0,c1); gr.addColorStop(1,c2);
+  g.fillStyle = gr; g.beginPath(); g.arc(m,m,r,0,TAU); g.fill();
+  g.lineWidth = .8; g.strokeStyle = 'rgba(0,0,0,.28)'; g.stroke();
+  if(sign){
+    g.strokeStyle = '#fff'; g.lineWidth = Math.max(2, r*.2); g.lineCap = 'round';
+    const L = r*.45; g.beginPath(); g.moveTo(m-L,m); g.lineTo(m+L,m);
+    if(sign === '+'){ g.moveTo(m,m-L); g.lineTo(m,m+L); }
+    g.stroke();
+  }
+  return {c, r:m};
+}
+const SP = {
+  Na: sprite(10,'#d7dbe0','#535c66','+'),
+  Cl: sprite(16,'#8fe39b','#1f7a34','-'),
+  O:  sprite(9,'#ff9a85','#bf2f1b'),
+  H:  sprite(5.5,'#ffffff','#aab1b9')
+};
+function drawSprite(s,x,y){ ctx.drawImage(s.c, x-s.r, y-s.r, s.r*2, s.r*2); }
+
+/* ---------- Zustand ---------- */
+const S = {step:1, voltage:false, charges:false, paused:false, speed:1, pairs:6,
+  I:0, jit:0, jitT:0, lamp:0, eOff:0, sel:null, hasWater:false, crystal:null, time:0, measure:[]};
+let ions = [], waters = [], flashes = [];
+
+const rnd = (a,b) => a + Math.random()*(b-a);
+function angDiff(a,b){ let d = (a-b) % TAU; if(d > Math.PI) d -= TAU; if(d < -Math.PI) d += TAU; return d; }
+function newWater(x,y){ return {kind:'w', x, y, vx:rnd(-20,20), vy:rnd(-20,20), a:rnd(0,TAU), av:0, host:null, slot:0}; }
+function newIon(type,x,y){ return {kind:'ion', type, x, y, vx:0, vy:0, inCrystal:false, gx:0, gy:0, shell:[], loosen:0,
+  thr:rnd(1.3,2.5), rot:0, rv:rnd(-.4,.4), fade:1, fadeDir:0, ph:rnd(0,TAU), normal:0}; }
+
+function waterTarget(w){
+  const h = w.host, ang = w.slot + h.rot, d = SHELL_D[h.type];
+  return {x:h.x + Math.cos(ang)*d, y:h.y + Math.sin(ang)*d, a: h.type === 'Na' ? ang : ang + Math.PI};
+}
+function snapShell(ion){ for(const w of ion.shell){ const t = waterTarget(w); w.x = t.x; w.y = t.y; w.a = t.a; } }
+
+function makeCrystal(dy){
+  S.crystal = {cx:450, baseY:500, dy, vy:0, falling: dy !== 0, landed: dy === 0};
+  for(let gy=0; gy<4; gy++) for(let gx=0; gx<4; gx++){
+    const ion = newIon((gx+gy)%2 === 0 ? 'Cl' : 'Na', 0, 0);
+    ion.inCrystal = true; ion.gx = gx; ion.gy = gy;
+    const p = latticePos(ion); ion.x = p.x; ion.y = p.y;
+    ions.push(ion);
+  }
+}
+function latticePos(ion){ const c = S.crystal; return {x:c.cx + (ion.gx-1.5)*SPACING, y:c.baseY - (3-ion.gy)*SPACING + c.dy}; }
+
+function freeSpot(ex){
+  let best = null, bs = -1;
+  for(let i=0;i<40;i++){
+    const x = rnd(BOX.x0+70, BOX.x1-70), y = rnd(BOX.y0+25, BOX.y1-25);
+    let md = 1e9;
+    for(const o of ions){ if(o === ex) continue; md = Math.min(md, Math.hypot(x-o.x, y-o.y)); }
+    if(md > bs){ bs = md; best = {x,y}; }
+  }
+  return best;
+}
+function addFreeWaters(n){
+  for(let i=0;i<n;i++){
+    let x, y, tries = 0;
+    do { x = rnd(BOX.x0, BOX.x1); y = rnd(BOX.y0, BOX.y1); tries++; }
+    while(tries < 15 && ions.some(o => Math.hypot(x-o.x, y-o.y) < (o.inCrystal ? 30 : 42)));
+    waters.push(newWater(x,y));
+  }
+}
+function buildSolution(p){
+  for(let i=0;i<p;i++) for(const type of ['Na','Cl']){
+    const s = freeSpot(null), ion = newIon(type, s.x, s.y);
+    for(let k=0;k<4;k++){ const w = newWater(0,0); w.host = ion; w.slot = k*Math.PI/2 + Math.PI/4; ion.shell.push(w); waters.push(w); }
+    snapShell(ion); ions.push(ion);
+  }
+  addFreeWaters(Math.max(30, 105 - 8*p));
+}
+
+function setup(step, keepVoltage){
+  ions = []; waters = []; flashes = []; S.crystal = null; S.sel = null; S.I = 0; S.eOff = 0;
+  if(!keepVoltage) S.voltage = false;
+  if(step === 1){ S.hasWater = false; makeCrystal(0); }
+  if(step === 2){ S.hasWater = true; addFreeWaters(105); }
+  if(step === 3){ S.hasWater = true; addFreeWaters(105); }
+  if(step === 4){ S.hasWater = true; buildSolution(S.pairs); }
+  $('#dropBtn').disabled = false;
+  syncVoltBtn();
+}
+
+/* ---------- Lösevorgang ---------- */
+const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+function buildGrid(){ const g = {}; for(const i of ions) if(i.inCrystal) g[i.gx+','+i.gy] = i; return g; }
+function nbInfo(ion, grid){
+  let cnt = 0, nx = 0, ny = 0;
+  for(const [dx,dy] of DIRS){
+    const gy = ion.gy + dy;
+    if(gy > 3 || grid[(ion.gx+dx)+','+gy]) cnt++; else { nx += dx; ny += dy; }
+  }
+  return {cnt, ang: Math.atan2(ny, nx)};
+}
+function nearestFreeWater(x, y, maxD){
+  let best = null, bd = maxD*maxD;
+  for(const w of waters){ if(w.host) continue; const d = (w.x-x)**2 + (w.y-y)**2; if(d < bd){ bd = d; best = w; } }
+  return best;
+}
+function dissolve(dt){
+  const grid = buildGrid();
+  let cand = null;
+  for(const ion of ions){
+    if(!ion.inCrystal) continue;
+    const nb = nbInfo(ion, grid);
+    if(nb.cnt >= 4) continue;
+    ion.normal = nb.ang;
+    if(ion.shell.length < 3 && Math.random() < 2.2*dt){
+      const w = nearestFreeWater(ion.x, ion.y, RAD[ion.type] + 58);
+      if(w){ const offs = [0,-.85,.85]; w.host = ion; w.slot = nb.ang + offs[ion.shell.length]; ion.shell.push(w); }
+    }
+    let settled = 0;
+    for(const w of ion.shell){ const t = waterTarget(w); if(Math.hypot(t.x-w.x, t.y-w.y) < 4) settled++; }
+    if(settled >= 2) ion.loosen += dt*settled*(4-nb.cnt)*.3;
+    if(ion.loosen > ion.thr && !cand) cand = ion;
+  }
+  if(cand) detach(cand);
+}
+function detach(ion){
+  ion.inCrystal = false;
+  const n = ion.normal;
+  ion.vx = Math.cos(n)*50; ion.vy = Math.sin(n)*50; ion.rot = 0;
+  const slots = [0,1,2,3].map(k => n + k*Math.PI/2), used = [false,false,false,false];
+  for(const w of ion.shell){
+    let bi = -1, bd = 99;
+    slots.forEach((s,i) => { if(used[i]) return; const d = Math.abs(angDiff(w.slot, s)); if(d < bd){ bd = d; bi = i; } });
+    used[bi] = true; w.slot = slots[bi];
+  }
+  for(let i=0;i<4;i++){
+    if(used[i]) continue;
+    const w = nearestFreeWater(ion.x, ion.y, 2000);
+    if(!w) break;
+    w.host = ion; w.slot = slots[i]; ion.shell.push(w);
+  }
+}
+
+/* ---------- Strom an den Elektroden ---------- */
+function discharge(ion){
+  ion.fadeDir = -1;
+  flashes.push({x: ion.type === 'Na' ? LX+12 : RX-12, y: ion.y, t:0});
+}
+function respawn(ion){
+  const s = freeSpot(ion);
+  ion.x = s.x; ion.y = s.y; ion.vx = ion.vy = 0; ion.fade = 0; ion.fadeDir = 1;
+  snapShell(ion);
+}
+
+/* ---------- Simulation ---------- */
+function update(dt){
+  S.time += dt;
+  const field = S.voltage && S.hasWater;
+  const c = S.crystal;
+  if(c && c.falling){
+    c.vy += 500*dt;
+    if(c.baseY + c.dy > WATER_TOP) c.vy = Math.min(c.vy, 140);
+    c.dy += c.vy*dt;
+    if(c.dy >= 0){ c.dy = 0; c.falling = false; c.landed = true; }
+  }
+  for(const ion of ions){
+    if(!ion.inCrystal) continue;
+    const p = latticePos(ion);
+    const amp = .7 + Math.min(2.6, ion.loosen*1.3);
+    const sh = S.voltage ? (ion.type === 'Na' ? -1.6 : 1.6) : 0;
+    ion.x = p.x + Math.sin(S.time*14 + ion.ph)*amp + sh;
+    ion.y = p.y + Math.cos(S.time*12 + ion.ph*1.7)*amp;
+  }
+  if(S.hasWater && c && c.landed) dissolve(dt);
+
+  const sq = Math.sqrt(dt);
+  for(const ion of ions){
+    if(ion.inCrystal) continue;
+    ion.vx += (Math.random()-.5)*110*sq; ion.vy += (Math.random()-.5)*110*sq;
+    if(field) ion.vx += (ion.type === 'Na' ? -1 : 1)*120*dt;
+    for(const o of ions){
+      if(o === ion) continue;
+      const dx = ion.x-o.x, dy = ion.y-o.y, d = Math.hypot(dx,dy) || .01, md = o.inCrystal ? 46 : 58;
+      if(d < md){ const f = (md-d)*10*dt; ion.vx += dx/d*f; ion.vy += dy/d*f; }
+    }
+    ion.vx *= 1-2*dt; ion.vy *= 1-2*dt;
+    ion.x += ion.vx*dt; ion.y += ion.vy*dt; ion.rot += ion.rv*dt;
+    const xm = BOX.x0+12, xM = BOX.x1-12, ym = BOX.y0+12, yM = BOX.y1-8;
+    if(ion.x < xm){ ion.x = xm; ion.vx = Math.abs(ion.vx)*.5; if(field && ion.type === 'Na' && ion.fadeDir === 0) discharge(ion); }
+    if(ion.x > xM){ ion.x = xM; ion.vx = -Math.abs(ion.vx)*.5; if(field && ion.type === 'Cl' && ion.fadeDir === 0) discharge(ion); }
+    if(ion.y < ym){ ion.y = ym; ion.vy = Math.abs(ion.vy)*.5; }
+    if(ion.y > yM){ ion.y = yM; ion.vy = -Math.abs(ion.vy)*.5; }
+    if(ion.fadeDir){
+      ion.fade += ion.fadeDir*2.2*dt;
+      if(ion.fade <= 0) respawn(ion);
+      else if(ion.fade >= 1){ ion.fade = 1; ion.fadeDir = 0; }
+    }
+  }
+
+  for(const w of waters){
+    if(w.host){
+      const t = waterTarget(w), k = Math.min(1, 7*dt);
+      w.x += (t.x-w.x)*k; w.y += (t.y-w.y)*k; w.a += angDiff(t.a, w.a)*k;
+      continue;
+    }
+    w.vx += (Math.random()-.5)*210*sq; w.vy += (Math.random()-.5)*210*sq;
+    w.av += (Math.random()-.5)*9*sq;
+    if(field) w.av -= Math.sin(w.a - Math.PI)*9*dt;
+    w.vx *= 1-2*dt; w.vy *= 1-2*dt; w.av *= 1-2*dt;
+    w.x += w.vx*dt; w.y += w.vy*dt; w.a += w.av*dt;
+    for(const ion of ions){
+      const dx = w.x-ion.x, dy = w.y-ion.y, md = ion.inCrystal ? RAD[ion.type]+12 : SHELL_D[ion.type]+15;
+      if(Math.abs(dx) > md || Math.abs(dy) > md) continue;
+      const d = Math.hypot(dx,dy) || .01;
+      if(d < md){
+        w.x = ion.x + dx/d*md; w.y = ion.y + dy/d*md;
+        const vn = w.vx*dx/d + w.vy*dy/d;
+        if(vn < 0){ w.vx -= vn*dx/d*1.5; w.vy -= vn*dy/d*1.5; }
+      }
+    }
+    if(w.x < BOX.x0){ w.x = BOX.x0; w.vx = Math.abs(w.vx); }
+    if(w.x > BOX.x1){ w.x = BOX.x1; w.vx = -Math.abs(w.vx); }
+    if(w.y < BOX.y0){ w.y = BOX.y0; w.vy = Math.abs(w.vy); }
+    if(w.y > BOX.y1){ w.y = BOX.y1; w.vy = -Math.abs(w.vy); }
+  }
+
+  for(const f of flashes) f.t += dt;
+  flashes = flashes.filter(f => f.t < .7);
+
+  const nFree = ions.filter(i => !i.inCrystal).length;
+  const target = field ? nFree*1.6 : 0;
+  S.I += (target - S.I)*Math.min(1, 3*dt);
+  if(S.I < .01) S.I = 0;
+  S.jitT += dt;
+  if(S.jitT > .5){ S.jitT = 0; S.jit = rnd(-.2,.2); }
+  S.lamp = Math.min(1, S.I/24);
+  S.eOff += dt*S.I*4;
+}
+
+/* ---------- Zeichnen ---------- */
+function beakerPath(){
+  ctx.beginPath(); ctx.moveTo(110,160); ctx.lineTo(110,514);
+  ctx.quadraticCurveTo(110,534,130,534); ctx.lineTo(770,534);
+  ctx.quadraticCurveTo(790,534,790,514); ctx.lineTo(790,160);
+}
+function drawElectrode(x, sign){
+  const g = ctx.createLinearGradient(x-8,0,x+8,0);
+  g.addColorStop(0,'#3b4450'); g.addColorStop(.5,'#7b8794'); g.addColorStop(1,'#3b4450');
+  ctx.fillStyle = g; ctx.fillRect(x-8,150,16,340);
+  ctx.fillStyle = '#fff'; ctx.font = '700 18px ' + FONT;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(sign, x, 178);
+}
+function drawWater(w){
+  const al = w.host ? w.host.fade : 1;
+  if(al <= .01) return;
+  ctx.globalAlpha = al;
+  drawSprite(SP.O, w.x, w.y);
+  drawSprite(SP.H, w.x + Math.cos(w.a-HANG)*HD, w.y + Math.sin(w.a-HANG)*HD);
+  drawSprite(SP.H, w.x + Math.cos(w.a+HANG)*HD, w.y + Math.sin(w.a+HANG)*HD);
+  ctx.globalAlpha = 1;
+}
+function drawCharges(w){
+  const al = w.host ? w.host.fade : 1;
+  if(al <= .3) return;
+  const c = Math.cos(w.a), s = Math.sin(w.a);
+  ctx.font = '700 10px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // an Ionen gebundene Moleküle: nur die nach außen zeigende Teilladung (innen sitzt das Ion)
+  const inward = w.host ? (w.host.type === 'Na' ? 'neg' : 'pos') : '';
+  if(inward !== 'neg'){ ctx.fillStyle = '#a3180a'; ctx.fillText('δ−', w.x - c*16, w.y - s*16); }
+  if(inward !== 'pos'){ ctx.fillStyle = '#1d4ed8'; ctx.fillText('δ+', w.x + c*22, w.y + s*22); }
+}
+function drawIon(ion){
+  if(ion.fade <= .01) return;
+  ctx.globalAlpha = ion.fade;
+  drawSprite(SP[ion.type], ion.x, ion.y);
+  ctx.globalAlpha = 1;
+}
+function polyPoint(pts, s){
+  for(let i=0;i<pts.length-1;i++){
+    const [ax,ay] = pts[i], [bx,by] = pts[i+1], L = Math.hypot(bx-ax, by-ay);
+    if(s <= L) return [ax + (bx-ax)*s/L, ay + (by-ay)*s/L];
+    s -= L;
+  }
+  return null;
+}
+function polyLen(pts){ let L = 0; for(let i=0;i<pts.length-1;i++) L += Math.hypot(pts[i+1][0]-pts[i][0], pts[i+1][1]-pts[i][1]); return L; }
+const PATH_L = [[440,WIRE_Y],[LX,WIRE_Y],[LX,150]];
+const PATH_R = [[RX,150],[RX,WIRE_Y],[460,WIRE_Y]];
+function drawElectrons(){
+  ctx.fillStyle = '#2563eb';
+  for(const p of [PATH_L, PATH_R]){
+    const L = polyLen(p);
+    for(let s = S.eOff % 22; s < L; s += 22){
+      const pt = polyPoint(p, s);
+      if(pt){ ctx.beginPath(); ctx.arc(pt[0], pt[1], 3.4, 0, TAU); ctx.fill(); }
+    }
+  }
+}
+let FONT = 'sans-serif';
+function drawCircuit(){
+  const closed = S.voltage;
+  ctx.strokeStyle = '#22303f'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(LX,150); ctx.lineTo(LX,WIRE_Y); ctx.lineTo(330,WIRE_Y);
+  ctx.moveTo(360,WIRE_Y); ctx.lineTo(440,WIRE_Y);
+  ctx.moveTo(460,WIRE_Y); ctx.lineTo(RX,WIRE_Y); ctx.lineTo(RX,150);
+  ctx.stroke();
+  if(closed && S.I > .3) drawElectrons();
+  // Schalter
+  ctx.fillStyle = '#22303f';
+  ctx.beginPath(); ctx.arc(330,WIRE_Y,4,0,TAU); ctx.arc(360,WIRE_Y,4,0,TAU); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(330,WIRE_Y);
+  if(closed) ctx.lineTo(360,WIRE_Y); else ctx.lineTo(354,WIRE_Y-20);
+  ctx.lineWidth = 3.5; ctx.stroke();
+  // Spannungsquelle
+  ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(440,50); ctx.lineTo(440,74); ctx.stroke();
+  ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(460,38); ctx.lineTo(460,86); ctx.stroke();
+  ctx.font = '700 17px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#22303f';
+  ctx.fillText('−', 428, 40); ctx.fillText('+', 473, 30);
+  ctx.font = '13px ' + FONT; ctx.fillStyle = '#56687a';
+  ctx.fillText('Spannungsquelle', 450, 104);
+  ctx.fillText(closed ? 'Schalter (zu)' : 'Schalter (offen)', 345, 104);
+  // Strommesser
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#22303f'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(250,WIRE_Y,17,0,TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#22303f'; ctx.font = '700 16px ' + FONT; ctx.fillText('A', 250, WIRE_Y+1);
+  const shown = S.I > .05 ? Math.max(0, S.I + (S.I > 1 ? S.jit : 0)) : 0;
+  ctx.fillStyle = '#16324f'; roundRect(196,86,108,26,6); ctx.fill();
+  ctx.fillStyle = '#ffd666'; ctx.font = '700 14px ' + FONT;
+  ctx.fillText('I = ' + shown.toFixed(1).replace('.',',') + ' mA', 250, 99.5);
+  // Lampe
+  const lx = 610;
+  if(S.lamp > .02){
+    const gr = ctx.createRadialGradient(lx,WIRE_Y,4,lx,WIRE_Y,17+55*S.lamp);
+    gr.addColorStop(0,'rgba(255,214,0,' + (.75*S.lamp) + ')'); gr.addColorStop(1,'rgba(255,214,0,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(lx,WIRE_Y,17+55*S.lamp,0,TAU); ctx.fill();
+  }
+  const l = S.lamp;
+  ctx.fillStyle = `rgb(${255},${Math.round(255-30*l)},${Math.round(255-200*l)})`;
+  ctx.strokeStyle = '#22303f'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(lx,WIRE_Y,17,0,TAU); ctx.fill(); ctx.stroke();
+  const d = 12;
+  ctx.beginPath(); ctx.moveTo(lx-d,WIRE_Y-d); ctx.lineTo(lx+d,WIRE_Y+d); ctx.moveTo(lx+d,WIRE_Y-d); ctx.lineTo(lx-d,WIRE_Y+d); ctx.stroke();
+  ctx.font = '13px ' + FONT; ctx.fillStyle = '#56687a'; ctx.fillText('Lampe', lx, 104);
+  // Polbeschriftung
+  ctx.font = '700 14px ' + FONT; ctx.fillStyle = '#22303f';
+  ctx.textAlign = 'left'; ctx.fillText('Minuspol', LX+10, 128);
+  ctx.textAlign = 'right'; ctx.fillText('Pluspol', RX-10, 128);
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+}
+function drawSelection(){
+  const s = S.sel; if(!s) return;
+  let r = 15;
+  if(s.kind === 'ion') r = s.inCrystal ? RAD[s.type]+6 : SHELL_D[s.type]+16;
+  ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle = '#e39b00'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, TAU); ctx.stroke(); ctx.restore();
+}
+function drawFlashes(){
+  for(const f of flashes){
+    const a = 1 - f.t/.7;
+    ctx.strokeStyle = `rgba(242,169,0,${a})`; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(f.x, f.y, 6 + 26*f.t, 0, TAU); ctx.stroke();
+    ctx.fillStyle = `rgba(37,99,235,${a})`; ctx.font = '700 13px ' + FONT; ctx.textAlign = 'center';
+    ctx.fillText('e⁻', f.x + (f.x < 450 ? 18 : -18), f.y - 14);
+  }
+}
+function caption(text, x, color){
+  ctx.font = '600 14px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = color || '#16324f'; ctx.fillText(text, x, 549);
+}
+function render(){
+  ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);
+  ctx.fillStyle = '#fbfdfe'; ctx.fillRect(0,0,W,H);
+  drawElectrode(LX,'−'); drawElectrode(RX,'+');
+  if(S.hasWater){
+    ctx.save(); beakerPath(); ctx.closePath(); ctx.clip();
+    const g = ctx.createLinearGradient(0,WATER_TOP,0,534);
+    g.addColorStop(0,'rgba(140,195,240,.32)'); g.addColorStop(1,'rgba(80,140,210,.32)');
+    ctx.fillStyle = g; ctx.fillRect(110,WATER_TOP,680,340);
+    ctx.strokeStyle = 'rgba(50,120,190,.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(110,WATER_TOP); ctx.lineTo(790,WATER_TOP); ctx.stroke();
+    ctx.restore();
+  }
+  for(const w of waters) drawWater(w);
+  for(const ion of ions) drawIon(ion);
+  if(S.charges) for(const w of waters) drawCharges(w);
+  drawSelection(); drawFlashes();
+  ctx.strokeStyle = '#8c9aab'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  beakerPath(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(97,155); ctx.lineTo(110,160); ctx.moveTo(803,155); ctx.lineTo(790,160); ctx.stroke();
+  drawCircuit();
+
+  ctx.font = '12px ' + FONT; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#8796a5';
+  ctx.fillText('Modell – nicht maßstabsgetreu', 888, 16);
+
+  if(S.step === 3 && !S.crystal){
+    ctx.font = '600 17px ' + FONT; ctx.textAlign = 'center'; ctx.fillStyle = '#1f5f9e';
+    ctx.fillText('Klicke unten auf „Salz ins Wasser geben“', 450, 360);
+  }
+  if(S.voltage){
+    if(S.step === 1) caption('Die Ionen schwingen auf ihren Gitterplätzen – sie können nicht wandern.', 450);
+    else if(S.step === 2) caption('Die Wassermoleküle drehen sich nur – sie wandern nicht.', 450);
+    else if(ions.some(i => !i.inCrystal)){
+      caption('◀  Na⁺ (Kationen) wandern zum Minuspol', 290, '#4b5560');
+      caption('Cl⁻ (Anionen) wandern zum Pluspol  ▶', 612, '#1f7a34');
+    }
+  }
+}
+
+/* ---------- Info-Box ---------- */
+function infoText(s){
+  const field = S.voltage && S.hasWater;
+  if(s.kind === 'ion'){
+    const na = s.type === 'Na', n = s.shell.length;
+    let t = `<b>${na ? 'Natrium-Ion (Na⁺)' : 'Chlorid-Ion (Cl⁻)'}</b>${na ? 'Kation – positiv geladen.' : 'Anion – negativ geladen.'} `;
+    if(s.inCrystal){
+      t += 'Sitzt auf einem Gitterplatz im Kristallgitter.';
+      if(n) t += ` ${n} Wassermolekül${n > 1 ? 'e haben' : ' hat'} sich schon angelagert.`;
+    } else {
+      t += `Frei beweglich. Hydrathülle aus ${n} Wassermolekülen – sie zeigen mit ${na ? 'dem O-Atom (δ−)' : 'den H-Atomen (δ+)'} zum Ion.`;
+      if(field) t += na ? ' Wandert zum Minuspol.' : ' Wandert zum Pluspol.';
+    }
+    return t;
+  }
+  let t = '<b>Wassermolekül (H₂O)</b>Dipol: O-Atom teilweise negativ (δ−), H-Atome teilweise positiv (δ+). Insgesamt ungeladen.';
+  if(s.host){
+    const ion = s.host.type === 'Na' ? 'Na⁺' : 'Cl⁻';
+    t += s.host.inCrystal ? ` Lagert sich gerade an ein ${ion}-Ion des Kristalls an.` : ` Gehört zur Hydrathülle eines ${ion}-Ions.`;
+  }
+  return t;
+}
+function updateInfo(){
+  const s = S.sel;
+  if(!s || S.step > 4 || (s.kind === 'ion' && s.fade < .2)){ infoEl.hidden = true; return; }
+  const t = infoText(s);
+  if(t !== infoEl._t){ infoEl.innerHTML = t; infoEl._t = t; }
+  infoEl.hidden = false;
+  const w = infoEl.offsetWidth, h = infoEl.offsetHeight, SW = stageEl.clientWidth, SH = H*scale;
+  let x = s.x*scale + 24, y = s.y*scale - 24;
+  if(x + w > SW - 6) x = s.x*scale - 24 - w;
+  x = Math.max(6, x); y = Math.min(Math.max(6, y), SH - 6 - h);
+  infoEl.style.transform = `translate(${x}px,${y}px)`;
+}
+canvas.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  const x = (e.clientX - r.left)/scale, y = (e.clientY - r.top)/scale;
+  if(x > 315 && x < 375 && y > 28 && y < 92){ toggleVoltage(); return; }
+  let hit = null;
+  for(const ion of ions) if(ion.fade > .5 && Math.hypot(x-ion.x, y-ion.y) < RAD[ion.type]+4){ hit = ion; break; }
+  if(!hit) for(const w of waters) if(Math.hypot(x-w.x, y-w.y) < 13){ hit = w; break; }
+  S.sel = hit;
+});
+
+/* ---------- Bedienelemente ---------- */
+function syncVoltBtn(){
+  const b = $('#voltBtn');
+  b.classList.toggle('on', S.voltage);
+  b.querySelector('span').textContent = S.voltage ? 'Spannung: AN' : 'Spannung: AUS';
+  b.setAttribute('aria-pressed', S.voltage);
+}
+function toggleVoltage(){ S.voltage = !S.voltage; syncVoltBtn(); }
+$('#voltBtn').onclick = toggleVoltage;
+$('#dropBtn').onclick = () => { if(S.crystal) return; makeCrystal(-285); $('#dropBtn').disabled = true; };
+$('#chargeBtn').onclick = () => { S.charges = !S.charges; $('#chargeBtn').setAttribute('aria-pressed', S.charges); };
+$('#pauseBtn').onclick = () => { S.paused = !S.paused; $('#pauseBtn').textContent = S.paused ? 'Weiter' : 'Pause'; };
+$('#resetBtn').onclick = () => setup(S.step, S.step === 4);
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  S.speed = +b.dataset.speed;
+  document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('active', x === b));
+});
+const pairsEl = $('#pairs');
+function pairsLabel(){ $('#pairsLbl').textContent = S.pairs === 0 ? 'kein Salz' : `${S.pairs} Ionenpaare (${2*S.pairs} Ionen)`; }
+pairsEl.oninput = () => { S.pairs = +pairsEl.value; pairsLabel(); setup(4, true); };
+pairsLabel();
+
+let lastStatus = '';
+function updateStatus(){
+  let t = '';
+  if(S.step === 3 && S.crystal){
+    const free = ions.filter(i => !i.inCrystal).length;
+    t = free === ions.length ? 'Der Kristall ist vollständig gelöst.' : `Gelöste Ionen: ${free} von ${ions.length}`;
+  }
+  if(S.step === 4) t = `Ionen in der Lösung: ${ions.length}`;
+  if(t !== lastStatus){ $('#status').textContent = t; lastStatus = t; }
+}
+
+/* ---------- Texte ---------- */
+const STEPS = {
+  1:{title:'Festes Kochsalz', where:'Station 1 von 4',
+    task:'Schalte die Spannung ein (Button oder Schalter im Bild). Leuchtet die Lampe? Klicke auch auf einzelne Teilchen im Kristall.',
+    explain:`<p>Kochsalz (Natriumchlorid) ist eine <b>Ionenverbindung</b>. Es besteht aus positiv geladenen <b>Natrium-Ionen (Na⁺)</b>, den <b>Kationen</b>, und negativ geladenen <b>Chlorid-Ionen (Cl⁻)</b>, den <b>Anionen</b>.</p>
+      <p>Im <b>Kristallgitter</b> sitzen die Ionen fest auf ihren <b>Gitterplätzen</b>. Sie können nur schwingen, aber nicht wandern. Es gibt also keine frei beweglichen Ladungsträger – die Lampe bleibt aus.</p>`,
+    merke:'Für elektrischen Strom braucht man frei bewegliche Ladungsträger. Festes Kochsalz enthält zwar Ionen, aber sie sind nicht beweglich.'},
+  2:{title:'Destilliertes Wasser', where:'Station 2 von 4',
+    task:'Schalte die Spannung ein und blende die Teilladungen δ+/δ− ein. Was machen die Wassermoleküle – und was macht die Lampe?',
+    explain:`<p>Ein Wassermolekül ist ein <b>Dipol</b>: Das Sauerstoff-Atom ist teilweise negativ geladen (δ−), die beiden Wasserstoff-Atome sind teilweise positiv geladen (δ+).</p>
+      <p>Insgesamt ist ein Wassermolekül aber <b>ungeladen</b>. Liegt eine Spannung an, drehen sich die Moleküle nur etwas – mit der δ+-Seite in Richtung Minuspol. Sie wandern nicht und transportieren keine Ladung. Destilliertes Wasser leitet den Strom deshalb (fast) nicht.</p>`,
+    merke:'Ein Dipol hat zwei unterschiedlich geladene Enden (Pole), ist insgesamt aber ungeladen.'},
+  3:{title:'Kochsalz löst sich in Wasser', where:'Station 3 von 4',
+    task:'Gib das Salz ins Wasser und beobachte die Ecken und Kanten des Kristalls. Klicke auf ein Wassermolekül am Kristall und auf ein gelöstes Ion. Tipp: Stelle das Tempo auf „langsam“.',
+    explain:`<ol>
+      <li><b>Anlagern:</b> Die Dipolmoleküle des Wassers lagern sich an die Ionen am Rand des Kristalls an – mit der negativen Seite (O, δ−) an die Na⁺-Ionen, mit der positiven Seite (H, δ+) an die Cl⁻-Ionen. Entgegengesetzte Ladungen stehen sich gegenüber.</li>
+      <li><b>Herauslösen:</b> Die Ionen werden von außen nach innen aus ihren Gitterplätzen gelöst. Zuerst trifft es die Ionen an den Ecken und Kanten.</li>
+      <li><b>Umlagern:</b> Die gelösten Ionen werden von Wassermolekülen umlagert und bilden eine <b>Hydrathülle</b>. Dadurch bleiben die Ionen gelöst und sind jetzt <b>frei beweglich</b>.</li></ol>
+      <p>Schalte die Spannung ein, während sich das Salz löst: Je mehr Ionen gelöst sind, desto heller wird die Lampe.</p>`,
+    merke:'Beim Lösen wird das Kristallgitter abgebaut. Es entstehen frei bewegliche Ionen mit Hydrathülle.'},
+  4:{title:'Strom in der Salzlösung', where:'Station 4 von 4',
+    task:'Schalte die Spannung ein und beobachte, wohin Na⁺ und Cl⁻ wandern. Verändere dann die Salzmenge und notiere die Stromstärke – wie in eurem Experiment.',
+    explain:`<p>Liegt eine Spannung an, wandern die frei beweglichen Ionen: Die <b>Kationen (Na⁺)</b> wandern zum <b>Minuspol</b>, die <b>Anionen (Cl⁻)</b> zum <b>Pluspol</b>. Diese Wanderung der Ionen ist der elektrische Strom in der Lösung. In den Kabeln fließen dagegen Elektronen (blaue Punkte).</p>
+      <p>An den Elektroden laufen chemische Reaktionen ab, bei denen Elektronen aufgenommen oder abgegeben werden (Elektrolyse – das lernt ihr später genauer). <i>Vereinfachung im Modell:</i> Die Ionen verschwinden an der Elektrode und tauchen an anderer Stelle neu auf, damit die Ionenmenge gleich bleibt.</p>
+      <p>Je mehr Salz gelöst ist, desto mehr Ladungsträger gibt es – und desto größer ist die Stromstärke.</p>`,
+    merke:'Salzlösungen leiten den elektrischen Strom, weil sie frei bewegliche Ionen enthalten.'}
+};
+
+function renderPanel(n){
+  const p = $('#panel');
+  if(n === 5){
+    p.innerHTML = `<p class="where">Zusammenfassung</p><h2>Das Wichtigste</h2>
+      <div class="explain">${[1,2,3,4].map(i => `<p><b>${STEPS[i].title}:</b> ${STEPS[i].merke}</p>`).join('')}</div>
+      <div class="nav"><button class="btn" id="prevBtn">Zurück zu Station 4</button></div>`;
+    $('#prevBtn').onclick = () => goStep(4);
+    return;
+  }
+  const st = STEPS[n];
+  p.innerHTML = `<p class="where">${st.where}</p><h2>${st.title}</h2>
+    <div class="task"><strong>Beobachtungsauftrag</strong><p>${st.task}</p></div>
+    <button class="btn primary" id="revealBtn" aria-expanded="false">Erklärung anzeigen</button>
+    <div id="explain" class="explain" hidden>${st.explain}<div class="merke"><strong>Merke</strong>${st.merke}</div></div>
+    ${n === 4 ? `<div class="measure"><h3>Messwerte</h3>
+      <div class="row"><button class="btn" id="measureBtn">Messwert notieren</button><button class="btn" id="clearBtn">Tabelle leeren</button></div>
+      <p class="hint" id="mHint">Schalte die Spannung ein, stelle eine Salzmenge ein und notiere den Wert.</p>
+      <table><thead><tr><th>Salzmenge</th><th>Stromstärke I</th></tr></thead><tbody id="mBody"></tbody></table></div>` : ''}
+    <div class="nav">
+      ${n > 1 ? '<button class="btn" id="prevBtn">Zurück</button>' : '<span></span>'}
+      <button class="btn" id="nextBtn">${n < 4 ? 'Weiter zu Station ' + (n+1) : 'Weiter zum Test'}</button>
+    </div>`;
+  const rb = $('#revealBtn');
+  rb.onclick = () => {
+    const ex = $('#explain'); ex.hidden = !ex.hidden;
+    rb.textContent = ex.hidden ? 'Erklärung anzeigen' : 'Erklärung ausblenden';
+    rb.setAttribute('aria-expanded', !ex.hidden);
+  };
+  if(n > 1) $('#prevBtn').onclick = () => goStep(n-1);
+  $('#nextBtn').onclick = () => goStep(n+1);
+  if(n === 4){
+    renderMeasure();
+    $('#measureBtn').onclick = () => {
+      if(!S.voltage){ $('#mHint').textContent = 'Schalte zuerst die Spannung ein.'; return; }
+      const v = S.I > .05 ? Math.max(0, S.I + (S.I > 1 ? S.jit : 0)) : 0;
+      S.measure.push({p:S.pairs, I:v});
+      if(S.measure.length > 10) S.measure.shift();
+      $('#mHint').textContent = 'Notiert. Verändere die Salzmenge und miss erneut.';
+      renderMeasure();
+    };
+    $('#clearBtn').onclick = () => { S.measure = []; renderMeasure(); };
+  }
+}
+function renderMeasure(){
+  const b = $('#mBody'); if(!b) return;
+  b.innerHTML = S.measure.map(m => `<tr><td>${m.p === 0 ? 'kein Salz' : m.p + ' Ionenpaare'}</td><td>${m.I.toFixed(1).replace('.',',')} mA</td></tr>`).join('');
+}
+
+/* ---------- Quiz ---------- */
+const QUIZ = [
+  {q:'Warum leitet festes Kochsalz den elektrischen Strom nicht?',
+   o:['Kochsalz enthält keine geladenen Teilchen.','Die Ionen sitzen fest auf ihren Gitterplätzen und können nicht wandern.','Die Ionen sind zu groß für den Strom.','Festes Salz enthält zu viele Elektronen.'], c:1,
+   e:'Im Kristallgitter gibt es zwar Ionen, also geladene Teilchen. Sie können aber nur schwingen und sich nicht frei bewegen.'},
+  {q:'Mit welcher Seite lagert sich ein Wassermolekül an ein Natrium-Ion (Na⁺) an?',
+   o:['Mit den Wasserstoff-Atomen (δ+)','Mit dem Sauerstoff-Atom (δ−)','Das ist zufällig.','Wassermoleküle lagern sich nur an Cl⁻-Ionen an.'], c:1,
+   e:'Entgegengesetzte Ladungen ziehen sich an: Die negative Teilladung am O-Atom zeigt zum positiven Na⁺-Ion.'},
+  {q:'Wie heißt die Hülle aus Wassermolekülen, die ein gelöstes Ion umgibt?',
+   o:['Elektronenhülle','Kristallgitter','Hydrathülle','Dipolhülle'], c:2,
+   e:'Die angelagerten Wassermoleküle bilden die Hydrathülle (griechisch hydor = Wasser).'},
+  {q:'Warum leitet destilliertes Wasser den Strom (fast) nicht?',
+   o:['Wassermoleküle sind insgesamt ungeladen – es fehlen frei bewegliche Ionen.','Wassermoleküle sind positiv geladen.','Destilliertes Wasser ist zu kalt.','Die Wassermoleküle sind zu klein.'], c:0,
+   e:'Wassermoleküle sind Dipole, aber insgesamt ungeladen. Im elektrischen Feld drehen sie sich nur etwas und transportieren keine Ladung.'},
+  {q:'Eine Salzlösung liegt an einer Spannung. Wohin wandern die Chlorid-Ionen (Cl⁻)?',
+   o:['Zum Minuspol','Zum Pluspol','Sie bleiben an ihrem Platz.','Sie steigen an die Wasseroberfläche.'], c:1,
+   e:'Die negativ geladenen Anionen werden vom Pluspol angezogen. Die positiven Na⁺-Kationen wandern zum Minuspol.'},
+  {q:'Was passiert mit der Stromstärke, wenn mehr Salz im Wasser gelöst wird?',
+   o:['Sie sinkt, weil das Wasser „dicker“ wird.','Sie bleibt gleich.','Sie steigt, weil mehr frei bewegliche Ionen Ladung transportieren.','Sie steigt, weil das Wasser wärmer wird.'], c:2,
+   e:'Mehr gelöste Ionen bedeuten mehr Ladungsträger. Deshalb steigt die Stromstärke.'}
+];
+function renderQuiz(){
+  const box = $('#quiz'); box.innerHTML = '';
+  let answered = 0, right = 0;
+  const sc = document.createElement('div'); sc.className = 'score';
+  function updateScore(){
+    if(answered < QUIZ.length){ sc.textContent = `${answered} von ${QUIZ.length} beantwortet, davon ${right} richtig`; return; }
+    sc.innerHTML = `<b>Ergebnis: ${right} von ${QUIZ.length} richtig.</b> <span>${right === QUIZ.length ? 'Super – du hast Lösevorgang und Leitfähigkeit verstanden!' : 'Schau dir die Stationen noch einmal an und versuche es erneut.'}</span> <button class="btn" id="quizAgain">Test wiederholen</button>`;
+    $('#quizAgain').onclick = renderQuiz;
+  }
+  QUIZ.forEach((item, i) => {
+    const card = document.createElement('div'); card.className = 'q';
+    card.innerHTML = `<div class="qn">Frage ${i+1} von ${QUIZ.length}</div><h3>${item.q}</h3><div class="opts"></div><div class="fb" hidden></div>`;
+    const opts = card.querySelector('.opts');
+    item.o.forEach((t, j) => {
+      const b = document.createElement('button'); b.className = 'opt'; b.textContent = t;
+      b.onclick = () => {
+        if(card.dataset.done) return;
+        card.dataset.done = '1'; answered++;
+        const ok = j === item.c; if(ok) right++;
+        b.classList.add(ok ? 'right' : 'wrong');
+        opts.children[item.c].classList.add('right');
+        [...opts.children].forEach(x => x.disabled = true);
+        const fb = card.querySelector('.fb'); fb.hidden = false; fb.className = 'fb ' + (ok ? 'ok' : 'no');
+        fb.innerHTML = `<b>${ok ? 'Richtig!' : 'Leider falsch.'}</b> ${item.e}`;
+        updateScore();
+      };
+      opts.appendChild(b);
+    });
+    box.appendChild(card);
+  });
+  box.appendChild(sc); updateScore();
+}
+
+/* ---------- Navigation ---------- */
+function goStep(n){
+  S.step = n;
+  document.querySelectorAll('.steps button').forEach(b => {
+    const on = +b.dataset.step === n; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'step' : 'false');
+  });
+  const quiz = n === 5;
+  $('#stageCol').hidden = quiz; $('#quizCol').hidden = !quiz;
+  document.querySelectorAll('[data-show]').forEach(el => el.hidden = !el.dataset.show.includes(String(n)));
+  renderPanel(n);
+  if(quiz) renderQuiz(); else { resize(); setup(n, false); }
+}
+document.querySelectorAll('.steps button').forEach(b => b.onclick = () => goStep(+b.dataset.step));
+
+/* ---------- Start ---------- */
+FONT = getComputedStyle(document.body).fontFamily;
+let last = performance.now();
+function frame(t){
+  let dt = Math.min(.05, (t - last)/1000); last = t;
+  if(S.step <= 4){
+    if(!S.paused){
+      dt *= S.speed;
+      const n = Math.max(1, Math.ceil(dt/.02));
+      for(let i=0;i<n;i++) update(dt/n);
+    }
+    render(); updateInfo(); updateStatus();
+  }
+  requestAnimationFrame(frame);
+}
+goStep(1);
+requestAnimationFrame(frame);
+})();
+</script>
+<div class="mio-foot"><div class="mio-in"><span>© 2026 MioAni · Lernen einfach gemacht</span><nav><a href="index.html">Startseite</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav></div></div></body>
+</html>
